@@ -163,7 +163,10 @@ fun Home(){
                 shape = RoundedCornerShape(0.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF008000)       // green color
-                )
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp)
                 ) {
                 Text("Create an Account")
             }
@@ -179,6 +182,11 @@ fun PasswordMatchExample() {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var isPasswordMatch by remember { mutableStateOf(true) }
+    val emailRegex = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")
+
+    var email by remember { mutableStateOf("") }
+    var isEmailError by remember { mutableStateOf(false) }
+
 
     Column(
         modifier = Modifier
@@ -186,6 +194,32 @@ fun PasswordMatchExample() {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+
+
+
+
+        TextField(
+            value = email,
+            label = {Text("Email")},
+            onValueChange = {
+                email = it
+                isEmailError = email.isNotEmpty() && !emailRegex.matches(email)
+            },
+            isError = isEmailError,
+            modifier = Modifier
+                .fillMaxWidth()
+
+        )
+
+
+        if (isEmailError) {
+            Text(
+                text = "This is not a valid email",
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+
+
         TextField(
             value = password,
             onValueChange = {
@@ -209,16 +243,30 @@ fun PasswordMatchExample() {
             isError = !isPasswordMatch
         )
 
+        val passwordRegex = Regex(
+            "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$"
+        )
+
+
+
         if (!isPasswordMatch) {
             Text(
                 text = "Passwords do not match",
                 color = MaterialTheme.colorScheme.error
             )
+        } else {
+            if(!passwordRegex.matches(password)&&password!=""&&confirmPassword!=""){
+                Text(
+                    text = "password rule, minimum of 8 characters, at least 1 number, 1 uppercase, and one lower case, can use special characters",
+                    color = MaterialTheme.colorScheme.error
+                )
+
+            }
         }
 
         Button(
             onClick = { /* Handle registration */ },
-            enabled = password.isNotEmpty() && confirmPassword.isNotEmpty() && isPasswordMatch,
+            enabled = password.isNotEmpty() && confirmPassword.isNotEmpty() && isPasswordMatch && passwordRegex.matches(password) &&!isEmailError,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Register")
